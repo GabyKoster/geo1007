@@ -109,24 +109,33 @@ function onMapClick(e) {
 
 map.on('click', onMapClick);
 
-// Get the user's location
-map.locate({ setView: true, maxZoom: 16 });
+// Function to handle geolocation success
+function onLocationSuccess(position) {
+  var latitude = position.coords.latitude;
+  var longitude = position.coords.longitude;
+  var accuracy = position.coords.accuracy;
 
-// Handle location found event
-function onLocationFound(e) {
-  var radius = e.accuracy / 2;
+  // Create a marker for the user's location
+  var userMarker = L.marker([latitude, longitude]).addTo(map);
+  userMarker.bindPopup('You are here').openPopup();
 
-  L.marker(e.latlng)
-    .addTo(map)
-    .bindPopup('You are within ' + radius + ' meters from this point')
-    .openPopup();
+  // Center the map on the user's location
+  map.setView([latitude, longitude], 13);
 
-  L.circle(e.latlng, radius).addTo(map);
+  // Print the accuracy information
+  console.log('Location accuracy (in meters): ' + accuracy);
 }
 
-// Handle location error event
-function onLocationError(e) {
-  alert(e.message);
+// Function to handle geolocation error
+function onLocationError(error) {
+  console.log('Failed to retrieve location: ' + error.message);
 }
 
-map.on('locationfound', onLocationFound);
+// Check if geolocation is supported by the browser
+if (navigator.geolocation) {
+  // Get the user's location
+  navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
+} else {
+  console.log('Geolocation is not supported by this browser.');
+}
+
